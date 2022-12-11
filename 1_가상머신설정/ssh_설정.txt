@@ -1,0 +1,53 @@
+1. ssh 배포
+
+# ssh-keygen 입력후에 특별한 입력없이 엔터 3번
+ssh-keygen
+
+# 클러스터를 구성하는 모든 서버들에 대해서 아래와 같이 함
+# 첫번째 입력 요구시 yes, 두번째 입력 요구시 해당서버의 root 패스워드 입력
+ssh-copy-id -i  ~/.ssh/id_rsa.pub  server01
+ssh-copy-id -i  ~/.ssh/id_rsa.pub  server02
+ssh-copy-id -i  ~/.ssh/id_rsa.pub  server03
+
+# 관리서버의 ~/.ssh/의 파일들을 모든 서버들에 카피함.
+# 아래 작업후에는 모든 서버들간에는 ssh을 로그인과정없이 접속이 가능함.
+scp -r  ~/.ssh/*  server01:~/.ssh/
+scp -r  ~/.ssh/*  server02:~/.ssh/
+scp -r  ~/.ssh/*  server03:~/.ssh/
+     
+---------------------------------------------------------------
+
+2. pssh 설정
+
+----------------- 각각 server의 network 정보를 담는 txt 파일을 root의 home 디렉토리에 생성
+------------------ 모든 서버의 정보(Network)
+[root@server01 ~]# vi ~/hosts_all.txt
+server01
+server02
+server03
+
+------------------ 마스터 제외 모든 서버의 정보(Network)
+[root@server01 ~]# vi ~/hosts.txt
+server02
+server03
+
+------------------  pssh 설치
+
+[root@server01 ~]# yum install -y epel-release
+[root@server01 ~]# yum install -y pssh
+
+------------------  /etc/hosts 파일을 Datanode 들로 복사
+[root@server01 ~]# pscp.pssh -h ~/hosts.txt /etc/hosts /etc/hosts
+[1] 15:12:38 [SUCCESS] server03
+[2] 15:12:39 [SUCCESS] server02
+
+------------------ DataNode 에서 확인
+[root@server02 ~]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+192.168.56.101 server01.hadoop.com server01
+192.168.56.102 server02.hadoop.com server02
+192.168.56.103 server03.hadoop.com server03
+
+[root@server02 ~]# cat /etc/hosts

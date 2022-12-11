@@ -1,0 +1,49 @@
+(Server02 에서 root 계정에서 설정)
+1. gcc와 tcl을 설치
+$ yum install -y gcc*
+$ yum install -y tcl
+
+(2021 CentOS 6버전 유지관리업데이트 지원기간이 끝나서 위 yum이 안 먹힐 수 있음)
+$ getconf LONG_BIT # 본인 컴퓨터는 64비트 확인
+64Bit :
+$ echo "https://vault.centos.org/6.10/os/x86_64/" > /var/cache/yum/x86_64/6/base/mirrorlist.txt
+$ echo "http://vault.centos.org/6.10/extras/x86_64/" > /var/cache/yum/x86_64/6/extras/mirrorlist.txt
+$ echo "http://vault.centos.org/6.10/updates/x86_64/" > /var/cache/yum/x86_64/6/updates/mirrorlist.txt
+참고 : https://suzxc2468.tistory.com/200
+참고2 : http://www.mins01.com/mh/tech/read/1445
+
+2. 레디스 5.0.7을 내려받아 빌드 및 설치를 진행
+$ cd /home/pilot-pjt
+$ wget http://download.redis.io/releases/redis-5.0.7.tar.gz
+$ tar -xvf redus-5.0.7.tar.gz
+$ cd /home/pilot-pjt/redis-5.0.7
+$ make
+$ make install
+$ cd /home/pilot-pjt/redis-5.0.7/utils
+$ chmod 755 install_server.sh
+
+$ ./install_server.sh
+
+3. 레디스 성공적인 설치여부 점검
+$ service redis_6379 status
+
+시작 : $ service redis_6379 start
+종료 : $ service redis_6379 stop
+
+4. 원격 접근 설정
+$ vi /etc/redis/6379.conf
+# bind 127.0.0.1 => "bind 127.0.0.1" 부분을 주석처리하여 바인딩 IP 제한 해제
+"protected-mode yes" 부분을 찾아 yes를 no로 변경
+$ service redis_6379 restart
+
+5. 간단히 레디스 서버에 데이터를 저장(Set)/조회(Get) 해본다
+$ redis-cli
+$ 127.0.0.1:6379> set key:1 Hello!BigData
+$ 127.0.0.1:6379> get key:1 
+$ 127.0.0.1:6379> del key:1
+$ 127.0.0.1:6379> quit
+
+* Redis client 실행 시, 하단의 명령어를 실행한다. bigdata.smartcar.redis-1.0.jar 파일은 제작자 제공의 파일이다
+$ cd /home/pilot-pjt/working
+$ java -cp bigdata.smartcar.redis-1.0.jar com.wikibook.bigdata.smartcar.redis.OverSpeedCarInfo 20211229
+

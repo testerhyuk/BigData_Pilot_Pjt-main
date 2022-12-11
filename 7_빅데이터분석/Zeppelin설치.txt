@@ -1,0 +1,43 @@
+(Server02에 root로 접속)
+1. 제플린 아카이브 파일 다운
+$ cd /home/pilot-pjt/
+$ wget http://archive.apache.org/dist/zeppelin/zeppelin-0.8.2/zeppelin-0.8.2-bin-all.tgz
+
+2. tar 파일 압축 해제
+$ tar -xvf zeppelin-0.8.2-bin-all.tgz
+$ ln -s zeppelin-0.8.2-bin-all zeppelin
+
+3. 제플린 환경 정보 설정
+$ cd /home/pilot-pjt/zeppelin/conf
+$ cp zeppelin-env.sh.template zeppelin-env.sh
+
+$ vi zeppelin-env.sh
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera
+export SPARK_HOME=/opt/cloudera/parcels/CDH/lib/spark
+export HADOOP_CONF_DIR=/etc/hadoop/conf
+
+# 하이브 임시 디렉터리를 제플린이 사용하기 위해 /tmp/hive 경로의 권한을 변경
+$ chmod 777 /tmp/hive
+
+4. 제플린에서 하이브 인터프리터를 사용하기 위해 하이브 설정 파일을 복사
+cp /etc/hive/conf/hive-site.xml /home/pilot-pjt/zeppelin/conf
+
+5. 제플린 설정 변경
+$ cd /home/pilot-pjt/zeppelin/conf
+
+# 제플린 설정 템플릿 파일을 복사
+$ cp zeppelin-site.xml.template zeppelin-site.xml
+$ vi zeppelin-site.xml
+
+- zeppelin.server.addr : 127.0.0.1 => 0.0.0.0
+- zeppelin.server.port : 8080 => 8081
+
+6. 제플린 명령을 위해 path 설정
+$ vi /root/.bash_profile
+PATH=$PATH:/home/pilot-pjt/zeppelin/bin 추가
+$ source /root/.bash_profile
+
+7. 제플린 설치 완료 및 구동 확인
+$ zeppelin-daemon.sh start
+
+# 확인 : server02.hadoop.com:8081/

@@ -1,0 +1,72 @@
+(Server02에 가서 root계정으로 접속)
+
+1. tar파일 다운
+$ cd /home/pilot-pjt
+$ wget http://archive.apache.org/dist/storm/apache-storm-1.2.3/apache-storm-1.2.3.tar.gz
+$ tar -xvf apache-storm-1.2.3.tar.gz
+$ ln -s apahce-storm-1.2.3 storm
+
+2. 환경설정 파일 수정(띄어쓰기 하나하나까지 정확히 입력할것)
+$ cd /home/pilot-pjt/storm/conf
+$ vi storm.yaml
+
+storm.zookeeper.servers:
+ - "server02.hadoop.com"
+
+storm.local.dir: "/home/pilot-pjt/storm/data"
+
+nimbus.seeds: ["server02.hadoop.com"]
+
+supervisor.slots.ports:
+ - 6700
+
+ui.port: 8088
+
+3. 스톰의 로그 레벨을 조정
+$ cd /home/pilot-pjt/storm/log4j2
+$ vi cluster.xml
+$ vi worker.xml
+
+75 ~ 91 줄 사이의 logger설정에서 level="info"로 되어있는 부분을 level="error"로 모두 변경
+
+4. 스톰 명령의 편리한 사용을 위해 root 계정의 프로파일에 스톰의 path를 설정
+$ vi /root/.bash_profile
+PATH=$PATH:/home/pilot-pjt/storm/bin
+$ source /root/.bash_profile
+
+5. 자바 버전이 1.8.x 인지 확인
+$ java -version
+(만약, 아닐경우 아래의 작업을 다시한번 진행)
+$ rm /usr/bin/java
+$ rm /usr/bin/javac
+$ ln -s /usr/java/jdk1.8.0_181-cloudera/bin/javac /usr/bin/javac
+$ ln -s /usr/java/jdk1.8.0_181-cloudera/bin/java /usr/bin/java
+
+6. 스톰이 자동 실행되도록 설정하는 스크립트 필요, Storm설정 디렉터리에 들어있음
+storm-nimbus, storm-supervisor, storm-ui
+FileZilla를 통해 전부 받아온 후
+세 파일의 권한을 모두 변경
+$ chmod 755 /etc/rc.d/init.d/storm-nimbus
+$ chmod 755 /etc/rc.d/init.d/storm-supervisor
+$ chmod 755 /etc/rc.d/init.d/storm-ui
+
+7. 서비스 등록 스크립트에 대한 log 및 pid 디렉터리 생성
+$ mkdir /var/log/storm
+$ mkdir /var/run/storm
+
+8. 세 파일에 대해 아래의 service/chkconfig 등록 명령을 각각 실행
+$ service storm-nimbus start
+$ service storm-supervisor start
+$ service storm-ui start
+
+9. 구동 상태 확인
+$ service storm-nimbus status
+$ service storm-supervisor status
+$ service storm-ui status
+
+10. 스톰 UI 접속
+http://server02.hadoop.com:8088
+
+* 스톰 Topology 배포시, 하단의 명령어를 실행한다. bigdata.smartcar.storm-1.0.jar 파일은 제작자 제공의 파일이다
+$ cd /home/pilot-pjt/working
+$ storm jar bigdata.smartcar.storm-1.0.jar com.wikibook.bigdata.smartcar.storm.SmartCarDriverTopology DriverCarInfo

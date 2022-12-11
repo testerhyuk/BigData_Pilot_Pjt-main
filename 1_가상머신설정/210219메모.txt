@@ -1,0 +1,9 @@
+CentOS8 다운로드주소 : http://mirror.kakao.com/centos/8.3.2011/isos/x86_64/
+CentOS7 다운로드주소 : http://mirror.anigil.com/CentOS/7.9.2009/isos/x86_64/
+
+- CentOS7로 설치한 이유. 기존의 service network 명령어가 8부터는 다른 방식으로 사용되므로,
+일단은 원활한 진행을 위해 하위단계인 7로 설치
+https://blog.dalso.org/linux/cent-os/4338
+
+- IP주소가 아닌 도메인명으로도 인식할수 있도록 함 
+C:\Windows\System32\drivers\etc\hosts

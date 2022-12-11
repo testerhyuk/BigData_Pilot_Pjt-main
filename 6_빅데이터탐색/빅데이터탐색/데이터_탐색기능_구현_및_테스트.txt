@@ -1,0 +1,47 @@
+(Server02에서 root 권한으로 사용)
+
+주제1 : 스마트카 상태 모니터링 정보
+주제2 : 스마트카 운전자 운행기록 정보
+주제3 : 이상 운전 패턴 스마트카 정보
+주제4 : 긴급 점검이 필요한 스마트카 정보
+주제5 : 운전자의 차량용품 구매 이력 정보
+
+0. 시작 하기 전에
+
+1) 스마트카 상태 정보 데이터 생성
+$ cd /home/pilot-pjt/working
+$ java -cp bigdata.smartcar.loggen-1.0.jar com.wikibook.bigdata.smartcar.loggen.CarLogMain 20200322 100 &
+
+# /home/pilot/working/SmartCar 위치에 SmartCarStatusInfo_20200322(실행일).txt 파일이 100MB 파일 크기로 생성되면, 시뮬레이터 종료
+$ cd /home/pilot-pjt/working/SmartCar
+$ ls -ltrh SmartCarStatusInfo_20200322.txt
+$ ps -ef | grep smartcar.log
+$ kill -9 [pid]
+
+2) 스마트카 상태 정보 데이터 적재
+$ mv /home/pilot-pjt/working/SmartCar/SmartCarStatusInfo_20200322.txt /home/pilot-pjt/working/car-batch-log
+# Flumne이 수집하여 Hadoop에 적재 완료되기까지 5~10분 정도 걸린다
+
+3) 스마트카 상태 정보 데이터 적재 확인
+$ hdfs dfs -ls -R /pilot-pjt/collect/car-batch-log
+# 크기가 각각 65MB, 57MB인 두개의 파일이 HDFS에 생성되어야함. .tmp 파일 있는 경우는 Flume에서 Hadoop까지 계속 적재중인 것이다
+
+4) 스마트카 운전자 운행 로그 생성
+$ cd /home/pilot-pjt/working/
+$ java -cp bigdata.smartcar.loggen-1.0.jar com.wikibook.bigdata.smartcar.loggen.DriverLogMain 20200322 100 &
+(# 저사양 환경에서는 스마트카 대수를 10 이하로 설정할 것)
+
+5) 스마트카 운전자의 운행 로그 확인
+$ cd /home/pilot-pjt/working/driver-realtime-log
+$ tail -f SmartCarDriverInfo.log
+
+6) 스마트카 운전자의 운행 데이터 적재 확인
+$ redis-cli
+$ 127.0.0.1:6379> smembers 20200322
+(과속 차량이 3대이상 발견되면 종료. 시뮬레이터 상황에 따라 과속차량이 아직 발생하지 않을수 있음)
+
+# 과속차량이 3대 이상 발견되면 스마트카 운전자에 대한 운행 로그 시뮬레이터 종료, 스마트카 상태 정보 시뮬레이터도 종료
+$ ps -ef | grep smartcar.log
+$ kill -9 [pid] [pid]
+
+(저사양 환경이면 플럼->카프카->스톰->레디스->HBase 모두 중지시킨다)

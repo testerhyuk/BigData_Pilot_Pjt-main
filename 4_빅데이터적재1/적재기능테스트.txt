@@ -1,0 +1,38 @@
+1. 플럼의 사용자 정의 Interceptor 추가
+- FTP 클라이언트인 FileZilla 실행하여 Server02에 접속
+- 업로드 경로 : /opt/cloudera/parcels/CDH/lib/flumne-ng/lib
+- /opt/cloudera/parcels/CDH/lib/flume-ng/lib에 bigdata.smarcar.flume-1.0.jar 파일을 업로드
+
+2. 플럼의 Conf 파일 수정
+- CM홈 -> Flume -> 구성을 선택하여 예제 4.2의 SmartCar_Agent.conf 파일을 열어 전체 내용을 복사 후 붙여넣음
+- 플럼의 [변경 내용 저장] 버튼을 클릭
+- CM 홈으로 다시 이동해서 플럼 재시작
+
+
+(아래 내용은 Server02 root 계정으로 작동)
+3. SmarCar 로그 시뮬레이터 작동
+$ cd /home/pilot-pjt/working
+
+# 2016년 1월 1일의 100대의 스마트카에 상태정보 로그를 생성
+$ java -cp bigdata.smartcar.loggen-1.0.jar com.wikibook.bigdata.smartcar.loggen.CarLogMain 20160101 100 &
+
+# 정상작동하는지 확인
+$ cd /home/pilot-pjt/working/SmartCar 
+$ tail -f SmartCarStatusInfo_20160101.txt
+
+4. 플럼 이벤트 작동
+# 스마트카 상태를 담아놓은 SmartCarStatusInfo 파일을 car-batch-log 디렉터리에 넣음
+$ mv /home/pilot-pjt/working/SmartCar/SmartCarStatusInfo_20160101.txt /home/pilot-pjt/working/car-batch-log
+
+$ cd /var/log/flume-ng/
+$ tail -f /var/log/flume-ng/flume-cmf-flume-AGENT-server02.hadoop.com.log
+
+5. HDFS 명령어 확인
+$ hdfs dfs -ls -R /pilot-pjt/collect/car-batch-log
+
+(해당 내용이 잘 hdfs에 잘 적재되는지 확인하기 위해 아래 명령어를 입력해본다)
++ $hdfs dfs -tail /pilot-pjt/collect/car-batch-log/wrk_date=20210224/car-batch-log.1614151634499.log
+
+6. 종료
+$ ps -ef | grep smartcar.log
+$ kill -9 [pid]

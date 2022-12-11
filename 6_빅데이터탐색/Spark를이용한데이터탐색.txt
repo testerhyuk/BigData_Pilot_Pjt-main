@@ -1,0 +1,12 @@
+(Server02에 root로 접속)
+$ spark-shell
+
+# 나이 18세 이상 기준으로 확인
+$ scala> val smartcar_master_df = spark.sqlContext.sql("SELECT * from SmartCar_Master where age >= 18")
+$ scala> smartcar_master_df.show()
+
+# 18세 이상으로 정제된 데이터셋을 하이브릐 Managed 테이블인 SmartCar_Master_Over18에 별도 저장
+$ scala> smartcar_master_df.write.saveAsTable("SmartCar_Master_Over18")
+
+# Hue 편집기에서 진행
+> select * from SmartCar_Master_Over18 where age > 18 limit 10;

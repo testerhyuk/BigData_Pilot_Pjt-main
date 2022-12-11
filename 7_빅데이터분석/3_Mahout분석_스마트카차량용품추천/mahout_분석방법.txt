@@ -1,0 +1,26 @@
+(server02에서 root로 진행, item 내용중에 추천할만한 내용을 보이게 하는 것)
+
+1. 필요 컬럼인 car_number, item, score 만을 추려서 다시 테이블을 재구성한다
+(Hue의 Hive에서 진행)
+insert overwrite local directory '/home/pilot-pjt/mahout-data/recommendation/input'
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+select hash(car_number ), hash(item), score from managed_smartcar_item_buylist_info
+
+2. 로컬 저장소에 잘 저장되었는지 확인
+$  more /home/pilot-pjt/mahout-data/recommendation/input/*
+
+3. hdfs내의 해당경로에 디렉터리를 생성, 그 후 로컬저장소의 내용을 hdfs에 put
+$ hdfs dfs -mkdir -p /pilot-pjt/mahout/recommendation/input
+$ hdfs dfs -put /home/pilot-pjt/mahout-data/recommendation/input/* /pilot-pjt/mahout/recommendation/input/item_buylist.txt
+
+4. 머하웃의 추천 분석기를 실행
+$ mahout recommenditembased -i /pilot-pjt/mahout/recommendation/input/item_buylist.txt -o /pilot-pjt/mahout/recommendation/output/ -s SIMILARITY_COOCCURRENCE -n 3
+# i: 추천분석에 사용할 입력 데이터 (/pilot-pjt/mahout/recommendation/input/item_buylist.txt)
+# o: 추천분석결과가 출력될 경로 (/pilot-pjt/mahout/recommendation/output/)
+# s: 추천을 위한 유사도 알고리즘 (SIMILARITY_COOCCURRENCE)
+# n: 추천할 아이템 갯수 (3)
+
+* 참고 : 추천분석을 재실행 할때는 기존 결과파일 삭제 후 재 실행 할것(그렇지 않으면 이미 존재하는 경로란 내용으로 오류발생)
+$ hdfs dfs -rm -R -skipTrash /pilot-pjt/mahout/recommendation/output
+$ hdfs dfs -rm -R -skipTrash /user/root/temp

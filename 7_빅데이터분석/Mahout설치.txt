@@ -1,0 +1,16 @@
+(server02 root에서 작업)
+1. 아파치 머아웃 다운로드
+$ cd /home/pilot-pjt/
+$ wget http://archive.apache.org/dist/mahout/0.13.0/apache-mahout-distribution-0.13.0.tar.gz
+$ tar -xvf apache-mahout-distribution-0.13.0.tar.gz
+
+# 링크 설정
+$ ln -s apache-mahout-distribution-0.13.0 mahout
+
+$ vi /root/.bash_profile
+PATH=$PATH:/home/pilot-pjt/mahout/bin 추가
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera 추가
+$ source /root/.bash_profile
+
+2. 머하웃 설치 확인
+$ mahout

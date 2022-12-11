@@ -1,0 +1,12 @@
+(Server02에 root 계정으로 접속)
+1. 카프카 Topic 생성 
+$ kafka-topics --create --zookeeper server02.hadoop.com:2181 --replication-factor 1 --partitions 1 --topic SmartCar-Topic
+
++ 카프카 토픽 삭제법
+$ kafka-topics --delete --zookeeper server02.hadoop.com:2181 --topic 토픽명
+
+2. 카프카 Producer 사용 
+$ kafka-console-producer --broker-list server02.hadoop.com:9092 --topic SmartCar-Topic
+
+3. 카프카 Consumer 사용
+$ kafka-console-consumer --bootstrap-server server02.hadoop.com:9092 --topic SmartCar-Topic --partition 0 --from-beginning

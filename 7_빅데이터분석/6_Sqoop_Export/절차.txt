@@ -1,0 +1,20 @@
+(Server01에서 root로 진행)
+
+1. 아래 명령어를 통해 PostgreSQL 비번찾기 
+$ cat /var/lib/cloudera-scm-server-db/data/generated_password.txt
+패스워드 : vsqBur5ygT
+
+2. PostgreSQL 접속
+$ psql -U cloudera-scm -p 7432 -h localhost -d postgres
+
+3. "이상 운전 패턴" 데이터를 PostgreSQL 테이블로 만들어 저장
+postgres=# create table smartcar_symptom_info ( car_number varchar, speed_p_avg varchar, speed_p_symptom varchar, break_p_avg varchar, break_p_symptom varchar, steer_a_cnt varchar, steer_p_symptom varchar, biz_date varchar );
+postgres=# select * from smartcar_symptom_info;
+
+4. 새로운 SSH창을 하나 더 열어 Server01에 접속하고, PostgreSQL JDBC 드라이버를 스쿱의 라이브러리 경로에 복사
+$ cp /opt/cloudera/parcels/CDH/jars/postgresql-*.jar /opt/cloudera/parcels/CDH/lib/sqoop/lib
+
+$ sqoop export --connect jdbc:postgresql://192.168.56.101:7432/postgres --username cloudera-scm --password vsqBur5ygT --table smartcar_symptom_info --export-dir /user/hive/warehouse/managed_smartcar_symptom_info
+
+5. 성공여부 확인
+postgres=# select * from smartcar_symptom_info;
